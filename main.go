@@ -11,3 +11,11 @@ const (
 func main() {
 	fmt.Println(usdToEur, usdToRub, eurToRub)
 }
+
+func getUserInput() string {
+	var inputData string
+	fmt.Scan(&inputData)
+	return inputData
+}
+
+func calculate(value float64, valueCurrency string, resultCurrency string) float64 {}

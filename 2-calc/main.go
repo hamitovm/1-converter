@@ -74,8 +74,8 @@ func getNumbers() []int {
 }
 
 func getAverageValue(numbers []int) float64 {
-	sum := getSumValue(numbers)
-	return float64(sum / len(numbers))
+	sum := float64(getSumValue(numbers))
+	return sum / float64(len(numbers))
 }
 
 func getSumValue(numbers []int) int {
@@ -91,9 +91,9 @@ func getMedianValue(numbers []int) float64 {
 	length := len(numbers)
 	if length%2 == 0 {
 		middleIndex := length / 2
-		firstValue := numbers[middleIndex]
-		secondValue := numbers[middleIndex-1]
-		return float64((firstValue + secondValue) / 2)
+		firstValue := float64(numbers[middleIndex])
+		secondValue := float64(numbers[middleIndex-1])
+		return (firstValue + secondValue) / 2
 	}
 	return float64(numbers[length/2])
 }

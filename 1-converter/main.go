@@ -22,13 +22,14 @@ func main() {
 	valueToCalculate := getValueToCalculate()
 	resultCurrencyName := getResultCurrencyName(sourceCurrencyName)
 
-	result := calculate(valueToCalculate, sourceCurrencyName, resultCurrencyName)
+	result := calculate(valueToCalculate, sourceCurrencyName, resultCurrencyName, &exchangeRateMap)
 
 	fmt.Println("_____________________________")
 	fmt.Printf("Результат перевода %f %s в %s равен %.2f", valueToCalculate, sourceCurrencyName, resultCurrencyName, result)
 }
 
-func calculate(value float64, sourceCurrencyName string, resultCurrencyName string) float64 {
+func calculate(value float64, sourceCurrencyName string, resultCurrencyName string, exchangeRateMapPtr *map[string]float64) float64 {
+	exchangeRateMap := *exchangeRateMapPtr
 	exchangeRate := exchangeRateMap[sourceCurrencyName]
 
 	valueInUsd := value / exchangeRate
@@ -76,7 +77,7 @@ func getValueToCalculate() float64 {
 }
 
 func getResultCurrencyName(sourceCurrencyName string) string {
-	aCurrencyName, bCurrencyName := getAvailableCurrencyNames(sourceCurrencyName)
+	aCurrencyName, bCurrencyName := getAvailableCurrencyNames(sourceCurrencyName, &exchangeRateMap)
 
 	var resultCurrencyName string
 
@@ -94,7 +95,9 @@ func getResultCurrencyName(sourceCurrencyName string) string {
 	return resultCurrencyName
 }
 
-func getAvailableCurrencyNames(unavailableCurrencyName string) (string, string) {
+// требование задания - передача по указателю
+func getAvailableCurrencyNames(unavailableCurrencyName string, exchangeRateMapPtr *map[string]float64) (string, string) {
+	exchangeRateMap := *exchangeRateMapPtr
 	availableCurrencyNames := []string{}
 	for key, _ := range exchangeRateMap {
 		if key != unavailableCurrencyName {

@@ -5,18 +5,17 @@ import (
 )
 
 const (
-	usdToEur = 0.87
-	usdToRub = 78.74
-	//  расчетах не участвует
-	_eurToRub = usdToRub / usdToEur
-)
-
-const (
 	usdCurrencyName = "USD"
 	eurCurrencyName = "EUR"
 	rubCurrencyName = "RUB"
 	currencyNames   = usdCurrencyName + " " + eurCurrencyName + " " + rubCurrencyName
 )
+
+var exchangeRateMap = map[string]float64{
+	usdCurrencyName: 1,
+	eurCurrencyName: 0.87,
+	rubCurrencyName: 78.74,
+}
 
 func main() {
 	sourceCurrencyName := getSourceCurrencyName()
@@ -30,24 +29,11 @@ func main() {
 }
 
 func calculate(value float64, sourceCurrencyName string, resultCurrencyName string) float64 {
-	divisor := 1.0
+	exchangeRate := exchangeRateMap[sourceCurrencyName]
 
-	if sourceCurrencyName == eurCurrencyName {
-		divisor = usdToEur
-	} else if sourceCurrencyName == rubCurrencyName {
-		divisor = usdToRub
-	}
+	valueInUsd := value / exchangeRate
 
-	valueInUsd := value / divisor
-
-	switch resultCurrencyName {
-	case eurCurrencyName:
-		return valueInUsd * usdToEur
-	case rubCurrencyName:
-		return valueInUsd * usdToRub
-	default:
-		return valueInUsd
-	}
+	return valueInUsd * exchangeRateMap[resultCurrencyName]
 }
 
 func requestReEntry() {
@@ -109,12 +95,11 @@ func getResultCurrencyName(sourceCurrencyName string) string {
 }
 
 func getAvailableCurrencyNames(unavailableCurrencyName string) (string, string) {
-	switch unavailableCurrencyName {
-	case usdCurrencyName:
-		return eurCurrencyName, rubCurrencyName
-	case eurCurrencyName:
-		return usdCurrencyName, rubCurrencyName
-	default:
-		return usdCurrencyName, eurCurrencyName
+	availableCurrencyNames := []string{}
+	for key, _ := range exchangeRateMap {
+		if key != unavailableCurrencyName {
+			availableCurrencyNames = append(availableCurrencyNames, key)
+		}
 	}
+	return availableCurrencyNames[0], availableCurrencyNames[1]
 }

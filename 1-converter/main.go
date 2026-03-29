@@ -5,49 +5,36 @@ import (
 )
 
 const (
-	usdToEur = 0.87
-	usdToRub = 78.74
-	//  расчетах не участвует
-	_eurToRub = usdToRub / usdToEur
-)
-
-const (
 	usdCurrencyName = "USD"
 	eurCurrencyName = "EUR"
 	rubCurrencyName = "RUB"
 	currencyNames   = usdCurrencyName + " " + eurCurrencyName + " " + rubCurrencyName
 )
 
+var exchangeRateMap = map[string]float64{
+	usdCurrencyName: 1,
+	eurCurrencyName: 0.87,
+	rubCurrencyName: 78.74,
+}
+
 func main() {
 	sourceCurrencyName := getSourceCurrencyName()
 	valueToCalculate := getValueToCalculate()
 	resultCurrencyName := getResultCurrencyName(sourceCurrencyName)
 
-	result := calculate(valueToCalculate, sourceCurrencyName, resultCurrencyName)
+	result := calculate(valueToCalculate, sourceCurrencyName, resultCurrencyName, &exchangeRateMap)
 
 	fmt.Println("_____________________________")
 	fmt.Printf("Результат перевода %f %s в %s равен %.2f", valueToCalculate, sourceCurrencyName, resultCurrencyName, result)
 }
 
-func calculate(value float64, sourceCurrencyName string, resultCurrencyName string) float64 {
-	divisor := 1.0
+func calculate(value float64, sourceCurrencyName string, resultCurrencyName string, exchangeRateMapPtr *map[string]float64) float64 {
+	exchangeRateMap := *exchangeRateMapPtr
+	exchangeRate := exchangeRateMap[sourceCurrencyName]
 
-	if sourceCurrencyName == eurCurrencyName {
-		divisor = usdToEur
-	} else if sourceCurrencyName == rubCurrencyName {
-		divisor = usdToRub
-	}
+	valueInUsd := value / exchangeRate
 
-	valueInUsd := value / divisor
-
-	switch resultCurrencyName {
-	case eurCurrencyName:
-		return valueInUsd * usdToEur
-	case rubCurrencyName:
-		return valueInUsd * usdToRub
-	default:
-		return valueInUsd
-	}
+	return valueInUsd * exchangeRateMap[resultCurrencyName]
 }
 
 func requestReEntry() {
@@ -90,7 +77,7 @@ func getValueToCalculate() float64 {
 }
 
 func getResultCurrencyName(sourceCurrencyName string) string {
-	aCurrencyName, bCurrencyName := getAvailableCurrencyNames(sourceCurrencyName)
+	aCurrencyName, bCurrencyName := getAvailableCurrencyNames(sourceCurrencyName, &exchangeRateMap)
 
 	var resultCurrencyName string
 
@@ -108,13 +95,14 @@ func getResultCurrencyName(sourceCurrencyName string) string {
 	return resultCurrencyName
 }
 
-func getAvailableCurrencyNames(unavailableCurrencyName string) (string, string) {
-	switch unavailableCurrencyName {
-	case usdCurrencyName:
-		return eurCurrencyName, rubCurrencyName
-	case eurCurrencyName:
-		return usdCurrencyName, rubCurrencyName
-	default:
-		return usdCurrencyName, eurCurrencyName
+// требование задания - передача по указателю
+func getAvailableCurrencyNames(unavailableCurrencyName string, exchangeRateMapPtr *map[string]float64) (string, string) {
+	exchangeRateMap := *exchangeRateMapPtr
+	availableCurrencyNames := []string{}
+	for key, _ := range exchangeRateMap {
+		if key != unavailableCurrencyName {
+			availableCurrencyNames = append(availableCurrencyNames, key)
+		}
 	}
+	return availableCurrencyNames[0], availableCurrencyNames[1]
 }

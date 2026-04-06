@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-func ReadFiles(name string) ([]byte, error) {
-	isJson := checkIsJson(name)
-	if !isJson {
-		return nil, errors.New("формат файла не соответствует json")
-	}
-	data, err := os.ReadFile(name)
+type File struct {
+	name string
+}
+
+func (f *File) ReadFiles() ([]byte, error) {
+	data, err := os.ReadFile(f.name)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
 }
 
-func WriteFiles(content []byte, name string) {
+func (f *File) WriteFiles(content []byte) {
 
-	file, err := os.Create(name)
+	file, err := os.Create(f.name)
 
 	if err != nil {
 		fmt.Println(err)
@@ -39,6 +39,14 @@ func WriteFiles(content []byte, name string) {
 	}(file)
 	fmt.Println("Запись успешна")
 
+}
+
+func NewFile(name string) (*File, error) {
+	isValidName := checkIsJson(name)
+	if !isValidName {
+		return nil, errors.New("формат файла должен быть .json")
+	}
+	return &File{name}, nil
 }
 
 func checkIsJson(name string) bool {

@@ -13,17 +13,29 @@ import (
 var reader = bufio.NewReader(os.Stdin)
 var operationTypes = []string{"avg", "sum", "med"}
 
+var operationsMap = map[string]func(numbers []int){
+	"sum": func(numbers []int) {
+		fmt.Println("Сумма равна", getSumValue(numbers))
+	},
+	"avg": func(numbers []int) {
+		fmt.Println("Средняя равна", getAverageValue(numbers))
+	},
+	"med": func(numbers []int) {
+		fmt.Println("Медиана равна", getMedianValue(numbers))
+	},
+}
+
 func main() {
 	operationType := getOperationType()
 	numbers := getNumbers()
 
 	switch operationType {
 	case "sum":
-		fmt.Println("Сумма равна", getSumValue(numbers))
+		operationsMap[operationType](numbers)
 	case "avg":
-		fmt.Println("Средняя равна", getAverageValue(numbers))
+		operationsMap[operationType](numbers)
 	case "med":
-		fmt.Println("Медиана равна", getMedianValue(numbers))
+		operationsMap[operationType](numbers)
 
 	}
 }

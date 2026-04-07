@@ -29,15 +29,7 @@ func main() {
 	operationType := getOperationType()
 	numbers := getNumbers()
 
-	switch operationType {
-	case "sum":
-		operationsMap[operationType](numbers)
-	case "avg":
-		operationsMap[operationType](numbers)
-	case "med":
-		operationsMap[operationType](numbers)
-
-	}
+	operationsMap[operationType](numbers)
 }
 
 func readUserInput() (string, error) {

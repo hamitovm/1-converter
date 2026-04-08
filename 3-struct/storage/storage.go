@@ -2,14 +2,45 @@ package storage
 
 import (
 	"demo/CLI/bins"
-	"demo/CLI/file"
 	"encoding/json"
 	"fmt"
 	"time"
 )
 
+type Db interface {
+	ReadFiles() ([]byte, error)
+	WriteFiles([]byte)
+}
+
 type Storage struct {
 	List bins.BinList `json:"list"`
+}
+
+type StorageWithDb struct {
+	Storage
+	Db Db
+}
+
+func NewStorage(db Db) *StorageWithDb {
+	file, err := db.ReadFiles()
+	if err != nil {
+		return &StorageWithDb{
+			Storage: Storage{
+				List: bins.BinList{},
+			},
+			Db: db,
+		}
+	}
+	var vault Storage
+	err = json.Unmarshal(file, &vault)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return &StorageWithDb{
+		Storage: vault,
+		Db:      db,
+	}
+
 }
 
 func (storage *Storage) ToBytes() ([]byte, error) {
@@ -20,10 +51,8 @@ func (storage *Storage) ToBytes() ([]byte, error) {
 	return file, nil
 }
 
-var LocalBinsStorageFileName = "bins.json"
-
-func ReadStorage() (*Storage, error) {
-	file, err := file.ReadFiles(LocalBinsStorageFileName)
+func (storageWithDb *StorageWithDb) ReadStorage() (*Storage, error) {
+	file, err := storageWithDb.Db.ReadFiles()
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +64,7 @@ func ReadStorage() (*Storage, error) {
 	return &storage, nil
 }
 
-func WriteStorage() {
+func (storageWithDb *StorageWithDb) WriteStorage() {
 	bin1 := bins.NewBin("1", true, time.Now(), "Первый")
 	bin2 := bins.NewBin("2", false, time.Now(), "Второй")
 	binList := bins.BinList{*bin1, *bin2}
@@ -44,5 +73,5 @@ func WriteStorage() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	file.WriteFiles(bytes, LocalBinsStorageFileName)
+	storageWithDb.Db.WriteFiles(bytes)
 }
